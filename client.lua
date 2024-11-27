@@ -20,26 +20,50 @@ local inSnowman = false
 -------------------------------------------------------------------------------------------------------------------------------------------
 -- Snowball Making and weather checking
 
-local keybind = lib.addKeybind({
-    name = 'snowball',
-    description = 'press G to make a snowball',
-    defaultKey = 'G',
-    onPressed = function(self)
-        TriggerEvent('snowball')
-    end,
-})
+
+CreateThread(function()
+    if GetInteriorFromEntity(cache.ped) == 1 then
+        if Config.Radial then
+            lib.registerRadial({
+                id = 'snowball',
+                items = {
+                    {
+                        label = 'Pickup Snowball',
+                        icon = 'snowflake',
+                        onSelect = function()
+                            TriggerEvent('snowball')
+                        end
+                    }
+                }
+            })
+        else
+            lib.removeRadialItem('snowball')
+        end
+    elseif Config.Keybind then
+        lib.addKeybind({
+            name = 'snowball',
+            description = 'Press G to make a snowball',
+            defaultKey = 'G',
+            onPressed = function(self)
+                TriggerEvent('snowball')
+            end,
+        })
+    end
+end)
+
+
 RegisterNetEvent('snowball', function()
     if inSnowman then
         exports.qbx_core:Notify('You can\'t do this while in a snowman!', 'error', 5000)
         return
-        end
-    local weather = GlobalState.weather.weather
+    end
 
     if GetInteriorFromEntity(cache.ped) == 0 then
         exports.qbx_core:Notify('You cannot make a snowball indoors!', 'error', 5000)
         return
     end
 
+    local weather = GlobalState.weather.weather
     if not table.contains(snowing, weather) then
         exports.qbx_core:Notify('There is no snow on the ground', 'error', 5000) -- Notify Client, There is no snow on the ground
         return
@@ -55,7 +79,7 @@ RegisterNetEvent('snowball', function()
         cooldown = false
         return
     end
-    if lib.progressCircle({            -- Start the Progress Circle
+    if lib.progressCircle({               -- Start the Progress Circle
             label = 'Making snowball', -- Label
             duration = 1500,
             position = 'bottom',
@@ -93,7 +117,7 @@ RegisterNetEvent('qbx_smallresources:client:snowmanProgress', function()
         return
     end
 
-    if lib.progressCircle({           -- Start the Progress Circle
+    if lib.progressCircle({              -- Start the Progress Circle
             label = 'Making Snowman', -- Label
             duration = 15000,
             position = 'bottom',
@@ -127,7 +151,7 @@ RegisterNetEvent('qbx_smallresources:client:snowmanProgress', function()
 
         local randomIndex = math.random(1, #snowmen)
         local snowmanModel = snowmen[randomIndex]
-       SnowmanEntity = CreateObject(snowmanModel, newCoords.x, newCoords.y, newCoords.z, true, true, true) -- Create the snowman
+        SnowmanEntity = CreateObject(snowmanModel, newCoords.x, newCoords.y, newCoords.z, true, true, true) -- Create the snowman
         print('WOOHOO, you made a snowman')
     else
         exports.qbx_core:Notify('You have cancelled the action', 'error', 5000) -- Notify Client, You cancelled the action
@@ -150,7 +174,8 @@ local function snowmanCheck()
                 lib.requestAnimDict('anim@sports@ballgame@handball@')
                 lib.requestNamedPtfxAsset('core')
                 UseParticleFxAssetNextCall('core')
-                StartNetworkedParticleFxNonLoopedAtCoord('ent_dst_xt_snowman', coords.x, coords.y, coords.z, 0.0, 0.0, 0.0,
+                StartNetworkedParticleFxNonLoopedAtCoord('ent_dst_xt_snowman', coords.x, coords.y, coords.z, 0.0, 0.0,
+                    0.0,
                     1,
                     false, false, false)
 
