@@ -32,11 +32,16 @@ RegisterNetEvent('snowball', function()
     if inSnowman then
         exports.qbx_core:Notify('You can\'t do this while in a snowman!', 'error', 5000)
         return
-        end
+    end
     local weather = GlobalState.weather.weather
 
     if GetInteriorFromEntity(cache.ped) ~= 0 then
         exports.qbx_core:Notify('You cannot make a snowball indoors!', 'error', 5000)
+        return
+    end
+
+    if GetVehiclePedIsIn(cache.ped, false) ~= 0 then
+        exports.qbx_core:Notify('You cannot make a snowball while in a vehicle!', 5000)
         return
     end
 
@@ -55,6 +60,7 @@ RegisterNetEvent('snowball', function()
         cooldown = false
         return
     end
+    TriggerEvent('ox_inventory:disarm', cache.playerId)
     if lib.progressCircle({            -- Start the Progress Circle
             label = 'Making snowball', -- Label
             duration = 1500,
@@ -92,7 +98,7 @@ RegisterNetEvent('qbx_smallresources:client:snowmanProgress', function()
         exports.qbx_core:Notify('You do not have enough snowballs or carrots', 'error', 5000) -- Notify Client, You do not have enough snowballs or carrots
         return
     end
-
+    TriggerEvent('ox_inventory:disarm', cache.playerId)
     if lib.progressCircle({           -- Start the Progress Circle
             label = 'Making Snowman', -- Label
             duration = 15000,
@@ -188,6 +194,7 @@ local function hideInSnowman(snowmanCoords, snowmanEntity)
         return
     end
     print("Hiding in snowman")
+    TriggerEvent('ox_inventory:disarm', cache.playerId)
     SetEntityVisible(playerPed, false, false)                                                               -- Set the player invisible
     SetEntityCoords(playerPed, snowmanCoords.x, snowmanCoords.y, snowmanCoords.z - 1, 0.0, 0.0, 0.0, false) -- Set the player inside the snowman
     FreezeEntityPosition(playerPed, true)                                                                   -- Freeze the player
